@@ -1,0 +1,60 @@
+import sqlite3
+
+def setup_database():
+    conn = sqlite3.connect("movies.db")
+    cursor = conn.cursor()
+
+    # Admin Table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS admin (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        )
+    """)
+
+    # User Table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        )
+    """)
+
+    # Movies Table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS movies (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            cast TEXT NOT NULL,
+            genre TEXT NOT NULL,
+            duration TEXT NOT NULL,
+            poster TEXT NOT NULL,
+            seats INTEGER NOT NULL
+        )
+    """)
+
+    # Bookings Table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS bookings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            movie_id INTEGER NOT NULL,
+            seats_booked INTEGER NOT NULL,
+            payment_status TEXT NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id),
+            FOREIGN KEY(movie_id) REFERENCES movies(id)
+        )
+    """)
+
+    # Insert Default Admin
+    cursor.execute("SELECT * FROM admin WHERE username = ?", ("admin",))
+    if not cursor.fetchone():
+        cursor.execute("INSERT INTO admin (username, password) VALUES (?, ?)", ("admin", "admin123"))
+
+    conn.commit()
+    conn.close()
+
+setup_database()
+print("Database setup complete! ✅")
